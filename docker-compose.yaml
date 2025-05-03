@@ -13,6 +13,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-mrs_secret_key_here_32_chars_long}
       - SEND_MAIL=${SEND_MAIL}
       - PASS_MAIL=${PASS_MAIL}
+      - SWAGGER_SERVER=${SWAGGER_SERVER:-http://localhost:3000}
     depends_on:
       - mongo
     networks:

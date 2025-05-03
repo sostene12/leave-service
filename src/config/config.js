@@ -9,6 +9,7 @@ export default {
   jwtSecret: process.env.JWT_SECRET,
   emailUser: process.env.SEND_MAIL,
   emailPass: process.env.PASS_MAIL,
+  swaggerUrl:process.env.SWAGGER_SERVER,
   defaultPtoAllowance: 20, // 20 days per year
   monthlyAccrualRate: 1.66, // 1.66 days per month
   maxCarryOverDays: 5, // Maximum 5 days carried over to next year

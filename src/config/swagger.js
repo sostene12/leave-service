@@ -1,9 +1,10 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import dotenv from "dotenv";
+import config from "./config";
 
 dotenv.config();
 
-const swaggerServer_prod = process.env.SWAGGER_SERVER || "https://leave-service-api.onrender.com";
+const swaggerServer_prod = config.swaggerUrl;
 
 const options = {
   swaggerDefinition: {
