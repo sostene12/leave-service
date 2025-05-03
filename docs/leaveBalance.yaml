@@ -1,0 +1,311 @@
+tags:
+  - name: Leave Balances
+    description: API endpoints for managing leave balances
+
+paths:
+  /api/leave-balances/{userId}:
+    get:
+      tags:
+        - Leave Balances
+      summary: Get user leave balance
+      description: Retrieve leave balance for a user
+      security:
+        - Authorization: []
+      parameters:
+        - name: userId
+          in: path
+          required: false
+          description: User ID (optional, defaults to authenticated user)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved leave balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave balance retrieved successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveBalanceResponse"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+
+  /api/leave-balances/adjust:
+    put:
+      tags:
+        - Leave Balances
+      summary: Adjust leave balance
+      description: Manually adjust a user's leave balance (Admin only)
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - amount
+                - reason
+              properties:
+                userId:
+                  type: string
+                  example: "user123"
+                  description: ID of the user
+                amount:
+                  type: number
+                  example: 2.5
+                  description: Amount to adjust (positive or negative)
+                reason:
+                  type: string
+                  example: "Additional leave for exceptional performance"
+                  description: Reason for the adjustment
+      responses:
+        "200":
+          description: Leave balance adjusted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave balance adjusted successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveBalance"
+        "400":
+          description: Missing required fields
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-balances/process-accruals:
+    post:
+      tags:
+        - Leave Balances
+      summary: Process accruals manually
+      description: Manually process leave accruals for all users (Admin only)
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Accruals processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Accruals processed successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                          example: "user123"
+                        userName:
+                          type: string
+                          example: "John Doe"
+                        newBalance:
+                          type: number
+                          example: 15.5
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-balances/process-year-end:
+    post:
+      tags:
+        - Leave Balances
+      summary: Process year-end carry over
+      description: Manually process year-end carry over for all users (Admin only)
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Year-end carry over processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Year-end carry over processed successfully
+                  data:
+                    type: object
+                    properties:
+                      processed:
+                        type: number
+                        example: 25
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-balances/process-expiring:
+    post:
+      tags:
+        - Leave Balances
+      summary: Process expiring carry over balances
+      description: Manually process expiring carry over balances (Admin only)
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Expiring carry overs processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Expiring carry overs processed successfully
+                  data:
+                    type: object
+                    properties:
+                      expired:
+                        type: number
+                        example: 10
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    LeaveBalanceResponse:
+      type: object
+      properties:
+        totalBalance:
+          type: number
+          example: 15.5
+        usedBalance:
+          type: number
+          example: 5
+        availableBalance:
+          type: number
+          example: 10.5
+        carryOverBalance:
+          type: number
+          example: 3
+        carryOverExpiryDate:
+          type: string
+          format: date
+          example: "2026-01-31"
+        lastAccrualDate:
+          type: string
+          format: date-time
+          example: "2025-04-01T00:00:00Z"
+        balanceHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/BalanceHistoryItem"
+    
+    LeaveBalance:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5c"
+        userId:
+          type: string
+          example: "user123"
+        userName:
+          type: string
+          example: "John Doe"
+        userEmail:
+          type: string
+          example: "john@example.com"
+        departmentId:
+          type: string
+          example: "dept123"
+        totalBalance:
+          type: number
+          example: 15.5
+        usedBalance:
+          type: number
+          example: 5
+        carryOverBalance:
+          type: number
+          example: 3
+        carryOverExpiryDate:
+          type: string
+          format: date-time
+          example: "2026-01-31T00:00:00Z"
+        lastAccrualDate:
+          type: string
+          format: date-time
+          example: "2025-04-01T00:00:00Z"
+        balanceHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/BalanceHistoryItem"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-04-01T00:00:00Z"
+    
+    BalanceHistoryItem:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5d"
+        date:
+          type: string
+          format: date-time
+          example: "2025-04-01T00:00:00Z"
+        action:
+          type: string
+          enum: ["accrual", "used", "adjustment", "carryover", "expiry"]
+          example: "accrual"
+        amount:
+          type: number
+          example: 1.66
+        reason:
+          type: string
+          example: "Monthly accrual (1 months)"
+        performedBy:
+          type: string
+          example: "system"

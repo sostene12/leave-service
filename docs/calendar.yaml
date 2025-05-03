@@ -1,0 +1,342 @@
+tags:
+  - name: Calendar
+    description: API endpoints for calendar functionality
+
+paths:
+  /api/calendar:
+    get:
+      tags:
+        - Calendar
+      summary: Get team calendar data
+      description: Retrieve calendar data including leave requests and holidays
+      security:
+        - Authorization: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: false
+          description: Filter by department ID
+          schema:
+            type: string
+        - name: month
+          in: query
+          required: false
+          description: Month (1-12)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          required: false
+          description: Year (e.g., 2025)
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully retrieved calendar data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Calendar data retrieved successfully
+                  data:
+                    $ref: "#/components/schemas/CalendarData"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+
+  /api/calendar/holidays:
+    get:
+      tags:
+        - Calendar
+      summary: Get all holidays
+      description: Retrieve all holidays, optionally filtered by year
+      security:
+        - Authorization: []
+      parameters:
+        - name: year
+          in: query
+          required: false
+          description: Filter by year (e.g., 2025)
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully retrieved holidays
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Holidays retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Holiday"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+    
+    post:
+      tags:
+        - Calendar
+      summary: Create a holiday
+      description: Create a new holiday (Admin only)
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - date
+              properties:
+                name:
+                  type: string
+                  example: "New Year's Day"
+                  description: Name of the holiday
+                date:
+                  type: string
+                  format: date
+                  example: "2025-01-01"
+                  description: Date of the holiday
+                description:
+                  type: string
+                  example: "First day of the year"
+                  description: Description of the holiday
+                isRecurring:
+                  type: boolean
+                  example: true
+                  description: Whether the holiday recurs annually
+      responses:
+        "201":
+          description: Holiday created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Holiday created successfully
+                  data:
+                    $ref: "#/components/schemas/Holiday"
+        "400":
+          description: Missing required fields or holiday already exists on this date
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/calendar/holidays/{id}:
+    put:
+      tags:
+        - Calendar
+      summary: Update a holiday
+      description: Update an existing holiday (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Holiday ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "New Year's Day (Updated)"
+                date:
+                  type: string
+                  format: date
+                  example: "2025-01-01"
+                description:
+                  type: string
+                  example: "Updated description"
+                isRecurring:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: Holiday updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Holiday updated successfully
+                  data:
+                    $ref: "#/components/schemas/Holiday"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "404":
+          description: Holiday not found
+        "500":
+          description: Internal server error
+    
+    delete:
+      tags:
+        - Calendar
+      summary: Delete a holiday
+      description: Delete an existing holiday (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Holiday ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Holiday deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Holiday deleted successfully
+                  data:
+                    type: null
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "404":
+          description: Holiday not found
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    CalendarData:
+      type: object
+      properties:
+        leaveRequests:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "609c17fc12b91f001f9c7d5b"
+              userId:
+                type: string
+                example: "user123"
+              userName:
+                type: string
+                example: "John Doe"
+              profilePicture:
+                type: string
+                example: "https://example.com/profile.jpg"
+              leaveType:
+                type: string
+                example: "Personal Time Off"
+              color:
+                type: string
+                example: "#3498db"
+              startDate:
+                type: string
+                format: date
+                example: "2025-06-01"
+              endDate:
+                type: string
+                format: date
+                example: "2025-06-10"
+              numberOfDays:
+                type: number
+                example: 7
+        holidays:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "609c17fc12b91f001f9c7d5e"
+              name:
+                type: string
+                example: "New Year's Day"
+              date:
+                type: string
+                format: date
+                example: "2025-01-01"
+              description:
+                type: string
+                example: "First day of the year"
+
+    Holiday:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5e"
+        name:
+          type: string
+          example: "New Year's Day"
+        date:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        description:
+          type: string
+          example: "First day of the year"
+        isRecurring:
+          type: boolean
+          example: true
+        recurringDay:
+          type: number
+          example: 1
+        recurringMonth:
+          type: number
+          example: 0
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T00:00:00Z"

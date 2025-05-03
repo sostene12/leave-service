@@ -1,0 +1,419 @@
+tags:
+  - name: Leave Requests
+    description: API endpoints for managing leave requests
+
+paths:
+  /api/leave-requests:
+    post:
+      tags:
+        - Leave Requests
+      summary: Submit a new leave request
+      description: Submit a new leave request for approval
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - leaveTypeId
+                - startDate
+                - endDate
+                - reason
+              properties:
+                leaveTypeId:
+                  type: string
+                  example: "609c17fc12b91f001f9c7d5a"
+                  description: ID of the leave type
+                startDate:
+                  type: string
+                  format: date
+                  example: "2025-06-01"
+                  description: Start date of the leave
+                endDate:
+                  type: string
+                  format: date
+                  example: "2025-06-10"
+                  description: End date of the leave
+                reason:
+                  type: string
+                  example: "Family vacation"
+                  description: Reason for the leave request
+                documentUrl:
+                  type: string
+                  example: "https://example.com/document.pdf"
+                  description: URL to supporting document (optional)
+      responses:
+        "201":
+          description: Leave request submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave request submitted successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveRequest"
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/my-requests:
+    get:
+      tags:
+        - Leave Requests
+      summary: Get user's leave requests
+      description: Retrieve all leave requests for the authenticated user
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Successfully retrieved leave requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave requests retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/department/{departmentId}:
+    get:
+      tags:
+        - Leave Requests
+      summary: Get department leave requests
+      description: Retrieve leave requests for a specific department (Manager only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: departmentId
+          in: path
+          required: false
+          description: Department ID (optional, defaults to user's department)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved department leave requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Department leave requests retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires manager privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/pending/{departmentId}:
+    get:
+      tags:
+        - Leave Requests
+      summary: Get pending leave requests
+      description: Retrieve pending leave requests for a specific department (Manager only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: departmentId
+          in: path
+          required: false
+          description: Department ID (optional, defaults to user's department)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved pending leave requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Pending leave requests retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires manager privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/active:
+    get:
+      tags:
+        - Leave Requests
+      summary: Get active leave requests
+      description: Retrieve currently active leave requests for the team calendar
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Successfully retrieved active leave requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Active leave requests retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/approve/{id}:
+    put:
+      tags:
+        - Leave Requests
+      summary: Approve leave request
+      description: Approve a pending leave request (Manager only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leave request approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave request approved successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires manager privileges
+        "404":
+          description: Leave request not found
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/reject/{id}:
+    put:
+      tags:
+        - Leave Requests
+      summary: Reject leave request
+      description: Reject a pending leave request (Manager only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave request ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rejectionReason
+              properties:
+                rejectionReason:
+                  type: string
+                  example: "Staff shortage during that period"
+                  description: Reason for rejecting the leave request
+      responses:
+        "200":
+          description: Leave request rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave request rejected successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveRequest"
+        "400":
+          description: Rejection reason is required
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires manager privileges
+        "404":
+          description: Leave request not found
+        "500":
+          description: Internal server error
+
+  /api/leave-requests/cancel/{id}:
+    put:
+      tags:
+        - Leave Requests
+      summary: Cancel leave request
+      description: Cancel a pending leave request
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leave request canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave request canceled successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveRequest"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "404":
+          description: Leave request not found
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    LeaveRequest:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5b"
+        userId:
+          type: string
+          example: "user123"
+        leaveTypeId:
+          type: object
+          properties:
+            _id:
+              type: string
+              example: "609c17fc12b91f001f9c7d5a"
+            name:
+              type: string
+              example: "Personal Time Off"
+            color:
+              type: string
+              example: "#3498db"
+        startDate:
+          type: string
+          format: date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          example: "2025-06-10"
+        reason:
+          type: string
+          example: "Family vacation"
+        status:
+          type: string
+          enum: ["pending", "approved", "rejected", "canceled"]
+          example: "pending"
+        approvedBy:
+          type: string
+          example: "manager456"
+        approvalDate:
+          type: string
+          format: date-time
+          example: "2025-05-25T10:30:00Z"
+        rejectionReason:
+          type: string
+          example: ""
+        documentUrl:
+          type: string
+          example: "https://example.com/document.pdf"
+        numberOfDays:
+          type: number
+          example: 7
+        userName:
+          type: string
+          example: "John Doe"
+        userEmail:
+          type: string
+          example: "john@example.com"
+        userProfilePicture:
+          type: string
+          example: "https://example.com/profile.jpg"
+        departmentId:
+          type: string
+          example: "dept123"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-05-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-05-10T10:30:00Z"

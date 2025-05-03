@@ -1,0 +1,364 @@
+tags:
+  - name: Admin
+    description: API endpoints for admin functionality
+
+paths:
+  /api/admin/departments:
+    get:
+      tags:
+        - Admin
+      summary: Get all departments
+      description: Retrieve all departments (Admin only)
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Successfully retrieved departments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Departments retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Department"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+    
+    post:
+      tags:
+        - Admin
+      summary: Create or update department
+      description: Create a new department or update an existing one (Admin only)
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - departmentId
+                - name
+                - managerId
+                - managerName
+                - managerEmail
+              properties:
+                departmentId:
+                  type: string
+                  example: "dept123"
+                  description: Unique department identifier
+                name:
+                  type: string
+                  example: "Engineering"
+                  description: Department name
+                managerId:
+                  type: string
+                  example: "manager456"
+                  description: Manager user ID
+                managerName:
+                  type: string
+                  example: "Jane Smith"
+                  description: Manager name
+                managerEmail:
+                  type: string
+                  example: "jane@example.com"
+                  description: Manager email
+      responses:
+        "200":
+          description: Department saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Department saved successfully
+                  data:
+                    $ref: "#/components/schemas/Department"
+        "400":
+          description: Missing required fields
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/admin/departments/{id}:
+    delete:
+      tags:
+        - Admin
+      summary: Delete department
+      description: Delete an existing department (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Department ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Department deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Department deleted successfully
+                  data:
+                    type: null
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "404":
+          description: Department not found
+        "500":
+          description: Internal server error
+
+  /api/admin/reports/leave:
+    get:
+      tags:
+        - Admin
+      summary: Generate leave report
+      description: Generate a report of leave requests with various filters (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: false
+          description: Filter by department ID
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: false
+          description: Filter by start date
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          description: Filter by end date
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          required: false
+          description: Filter by leave request status
+          schema:
+            type: string
+            enum: ["pending", "approved", "rejected", "canceled"]
+        - name: leaveTypeId
+          in: query
+          required: false
+          description: Filter by leave type ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leave report generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave report generated successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveReportItem"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/admin/reports/balance:
+    get:
+      tags:
+        - Admin
+      summary: Generate balance report
+      description: Generate a report of leave balances, optionally filtered by department (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: departmentId
+          in: query
+          required: false
+          description: Filter by department ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Balance report generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Balance report generated successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/BalanceReportItem"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    Department:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5f"
+        departmentId:
+          type: string
+          example: "dept123"
+        name:
+          type: string
+          example: "Engineering"
+        managerId:
+          type: string
+          example: "manager456"
+        managerName:
+          type: string
+          example: "Jane Smith"
+        managerEmail:
+          type: string
+          example: "jane@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-12-01T00:00:00Z"
+    
+    LeaveReportItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5b"
+        employeeId:
+          type: string
+          example: "user123"
+        employeeName:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john@example.com"
+        departmentId:
+          type: string
+          example: "dept123"
+        leaveType:
+          type: string
+          example: "Personal Time Off"
+        startDate:
+          type: string
+          format: date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          example: "2025-06-10"
+        numberOfDays:
+          type: number
+          example: 7
+        reason:
+          type: string
+          example: "Family vacation"
+        status:
+          type: string
+          enum: ["pending", "approved", "rejected", "canceled"]
+          example: "approved"
+        approvedBy:
+          type: string
+          example: "manager456"
+        approvalDate:
+          type: string
+          format: date-time
+          example: "2025-05-25T10:30:00Z"
+        submissionDate:
+          type: string
+          format: date-time
+          example: "2025-05-10T10:30:00Z"
+    
+    BalanceReportItem:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "user123"
+        userName:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john@example.com"
+        departmentId:
+          type: string
+          example: "dept123"
+        totalBalance:
+          type: number
+          example: 15.5
+        usedBalance:
+          type: number
+          example: 5
+        availableBalance:
+          type: number
+          example: 10.5
+        carryOverBalance:
+          type: number
+          example: 3
+        carryOverExpiryDate:
+          type: string
+          format: date
+          example: "2026-01-31"

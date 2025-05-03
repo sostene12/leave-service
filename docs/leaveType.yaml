@@ -1,0 +1,270 @@
+tags:
+  - name: Leave Types
+    description: API endpoints for managing leave types
+
+paths:
+  /api/leave-types:
+    get:
+      tags:
+        - Leave Types
+      summary: Get all leave types
+      description: Retrieve all active leave types
+      security:
+        - Authorization: []
+      responses:
+        "200":
+          description: Successfully retrieved leave types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave types retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LeaveType"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "500":
+          description: Internal server error
+    
+    post:
+      tags:
+        - Leave Types
+      summary: Create a new leave type
+      description: Create a new leave type (Admin only)
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+              properties:
+                name:
+                  type: string
+                  example: "Personal Time Off"
+                description:
+                  type: string
+                  example: "Annual leave for vacation or personal time"
+                requiresDocumentation:
+                  type: boolean
+                  example: false
+                maxDuration:
+                  type: number
+                  example: 20
+                  description: Maximum number of days allowed (null means no limit)
+                color:
+                  type: string
+                  example: "#3498db"
+                  description: Color code for calendar visualization
+      responses:
+        "201":
+          description: Leave type created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave type created successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveType"
+        "400":
+          description: Invalid input or leave type already exists
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "500":
+          description: Internal server error
+
+  /api/leave-types/{id}:
+    get:
+      tags:
+        - Leave Types
+      summary: Get leave type by ID
+      description: Retrieve a specific leave type by its ID
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave type ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved leave type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave type retrieved successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveType"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "404":
+          description: Leave type not found
+        "500":
+          description: Internal server error
+    
+    put:
+      tags:
+        - Leave Types
+      summary: Update leave type
+      description: Update an existing leave type (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave type ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Leave Type Name"
+                description:
+                  type: string
+                  example: "Updated description"
+                requiresDocumentation:
+                  type: boolean
+                  example: true
+                maxDuration:
+                  type: number
+                  example: 15
+                isActive:
+                  type: boolean
+                  example: true
+                color:
+                  type: string
+                  example: "#2ecc71"
+      responses:
+        "200":
+          description: Leave type updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave type updated successfully
+                  data:
+                    $ref: "#/components/schemas/LeaveType"
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "404":
+          description: Leave type not found
+        "500":
+          description: Internal server error
+    
+    delete:
+      tags:
+        - Leave Types
+      summary: Delete leave type
+      description: Soft delete a leave type by setting isActive to false (Admin only)
+      security:
+        - Authorization: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Leave type ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leave type deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Leave type deleted successfully
+                  data:
+                    type: null
+        "401":
+          description: Unauthorized - Invalid or missing token
+        "403":
+          description: Forbidden - Requires admin privileges
+        "404":
+          description: Leave type not found
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    LeaveType:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "609c17fc12b91f001f9c7d5a"
+        name:
+          type: string
+          example: "Personal Time Off"
+        description:
+          type: string
+          example: "Annual leave for vacation or personal time"
+        requiresDocumentation:
+          type: boolean
+          example: false
+        maxDuration:
+          type: number
+          example: 20
+        isActive:
+          type: boolean
+          example: true
+        color:
+          type: string
+          example: "#3498db"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-05-12T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-05-12T10:30:00Z"

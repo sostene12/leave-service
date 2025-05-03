@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  leave-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=${PORT:-3000}
+      - MONGODB_URL=${MONGODB_URL:-mongodb://mongo:27017/leave-management}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://auth-service:8080}
+      - JWT_SECRET=${JWT_SECRET:-mrs_secret_key_here_32_chars_long}
+      - SEND_MAIL=${SEND_MAIL}
+      - PASS_MAIL=${PASS_MAIL}
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+  
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
